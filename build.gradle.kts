@@ -5,7 +5,12 @@ plugins {
 }
 
 group = "me.notom3ga"
-version = "1.0"
+version = "1.1"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 repositories {
     mavenCentral()
@@ -15,7 +20,7 @@ repositories {
 
 dependencies {
     compileOnly("com.destroystokyo.paper", "paper-api", "1.16.5-R0.1-SNAPSHOT")
-    implementation("com.mojang", "brigadier", "1.0.17")
+    compileOnly("com.mojang", "brigadier", "1.0.17")
     implementation("me.lucko", "commodore", "1.9")
 }
 
@@ -31,8 +36,11 @@ tasks {
 
     shadowJar {
         archiveFileName.set("${rootProject.name}-${rootProject.version}.jar")
-        exclude("com.mojang")
-        include("me.lucko")
+
+        dependencies {
+            exclude(dependency("com.mojang:brigadier:1.0.17"))
+        }
+
         relocate("me.lucko", "me.notom3ga.clementine.libs.me.lucko")
     }
 

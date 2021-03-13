@@ -1,42 +1,42 @@
 package me.notom3ga.clementine;
 
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.Command;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public abstract class ClementineCommand extends Command {
+public abstract class Command extends org.bukkit.command.Command {
 
     protected final Clementine clementine;
-    private final String clementineName;
-    private final List<String> clementineAliases;
-
-    private String clementinePermission;
-    private String clementineDescription;
-
+    private final String cName;
+    private final List<String> cAliases;
+    private String cPermission;
+    private String cDescription;
     private Boolean playerOnly = false;
-    private Component playerOnlyMessage = Component.text("Error: ").color(NamedTextColor.RED)
-            .append(Component.text("Only players can run this command.").color(NamedTextColor.GRAY));
+    private String playerOnlyMessage = ChatColor.translateAlternateColorCodes('&', "&cError: &7This command can only be ran by players.");
 
     /**
-     * Create a new {@link Clementine} {@link ClementineCommand}.
+     * Create a new {@link Clementine} {@link Command}.
      *
      * @param clementine The {@link Clementine} instance of the plugin.
      * @param name The main name of the command.
      */
-    protected ClementineCommand(Clementine clementine, String name) {
+    protected Command(Clementine clementine, String name, String... aliases) {
         super(name);
 
         this.clementine = clementine;
-        this.clementineName = name;
-        this.clementineAliases = new ArrayList<>();
+        this.cName = name;
+
+        this.cAliases = new ArrayList<>();
+        cAliases.addAll(Arrays.asList(aliases));
+        setAliases(cAliases);
     }
 
     /**
@@ -46,7 +46,7 @@ public abstract class ClementineCommand extends Command {
      */
     @NotNull
     public String getClementineName() {
-        return this.clementineName;
+        return this.cName;
     }
 
     /**
@@ -56,16 +56,7 @@ public abstract class ClementineCommand extends Command {
      */
     @NotNull
     public List<String> getClementineAliases() {
-        return this.clementineAliases;
-    }
-
-    /**
-     * Adds an alias that can be used to execute the command.
-     *
-     * @param alias An alias to add to the command.
-     */
-    public void addClementineAlias(String alias) {
-        this.clementineAliases.add(alias);
+        return this.cAliases;
     }
 
     /**
@@ -75,16 +66,16 @@ public abstract class ClementineCommand extends Command {
      */
     @Nullable
     public String getClementinePermission() {
-        return this.clementinePermission;
+        return this.cPermission;
     }
 
     /**
-     * Sets the permission node the {@link CommandSender} must have to run the command.
+     * Sets the permission node the {@link CommandSender} must have to run the command. This can not be changed after registration.
      *
      * @param perm The permission node the {@link CommandSender} must have to run the command.
      */
     public void setClementinePermission(@Nullable String perm) {
-        this.clementinePermission = perm;
+        this.cPermission = perm;
     }
 
     /**
@@ -94,16 +85,16 @@ public abstract class ClementineCommand extends Command {
      */
     @Nullable
     public String getClementineDescription() {
-        return this.clementineDescription;
+        return this.cDescription;
     }
 
     /**
-     * Sets the commands description for the {@link CommandSender} to see in the 'help' command.
+     * Sets the commands description for the {@link CommandSender} to see in the 'help' command. This can not be changed after registration.
      *
      * @param description The description for the {@link CommandSender} to see in the 'help' command.
      */
     public void setClementineDescription(@Nullable String description) {
-        this.clementineDescription = description;
+        this.cDescription = description;
     }
 
     /**
@@ -117,7 +108,7 @@ public abstract class ClementineCommand extends Command {
     }
 
     /**
-     * Sets if the command can only be used by a {@link Player}.
+     * Sets if the command can only be used by a {@link Player}. This can be changed after registration.
      *
      * @param playerOnly If the command can only be used by a {@link Player}.
      */
@@ -131,16 +122,16 @@ public abstract class ClementineCommand extends Command {
      * @return The message to send to the {@link CommandSender}.
      */
     @NotNull
-    public Component getPlayerOnlyMessage() {
+    public String getPlayerOnlyMessage() {
         return this.playerOnlyMessage;
     }
 
     /**
-     * Sets the message that the {@link CommandSender} will see if they are not a {@link Player}.
+     * Sets the message that the {@link CommandSender} will see if they are not a {@link Player}. This can be changed after registration.
      *
      * @param playerOnlyMessage The message to send to the {@link CommandSender}.
      */
-    public void setPlayerOnlyMessage(@NotNull Component playerOnlyMessage) {
+    public void setPlayerOnlyMessage(@NotNull String playerOnlyMessage) {
         this.playerOnlyMessage = playerOnlyMessage;
     }
 
@@ -163,6 +154,11 @@ public abstract class ClementineCommand extends Command {
 
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String name, @NotNull String[] args) {
+        if (cPermission != null && !sender.hasPermission(cPermission)) {
+            sender.sendMessage(Bukkit.getServer().getPermissionMessage());
+            return true;
+        }
+
         if (playerOnly && !(sender instanceof Player)) {
             sender.sendMessage(playerOnlyMessage);
             return true;

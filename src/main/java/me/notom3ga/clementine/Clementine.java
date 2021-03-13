@@ -6,8 +6,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -43,23 +45,20 @@ public class Clementine {
     }
 
     /**
-     * Registers a new {@link ClementineCommand} under Clementine.
+     * Registers a new {@link Command} under Clementine.
      *
-     * @param command The {@link ClementineCommand} to register.
+     * @param command The {@link Command} to register.
      */
-    public void register(@NotNull ClementineCommand command) {
-        commandMap.register(command.getName(), command);
-        org.bukkit.command.Command bukkitCommand = Objects.requireNonNull(commandMap.getCommand(command.getName()));
+    public void register(@NotNull Command command) {
+        commandMap.register(plugin.getName().toLowerCase(Locale.ROOT), command);
+        org.bukkit.command.Command bukkitCommand = Objects.requireNonNull(commandMap.getCommand(command.getClementineName()));
 
         if (command.getClementinePermission() != null) {
             bukkitCommand.setPermission(command.getClementinePermission());
         }
-
         if (command.getClementineDescription() != null) {
             bukkitCommand.setDescription(command.getClementineDescription());
         }
-
-        bukkitCommand.setAliases(command.getClementineAliases());
 
         commodore.register(command, command.getStructure());
     }
@@ -88,6 +87,7 @@ public class Clementine {
         }
     }
 
+    @Nullable
     public Executor getAsyncExecutor() {
         return this.asyncExecutor;
     }
