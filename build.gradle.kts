@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "me.notom3ga"
-version = "1.1"
+version = "1.2-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8

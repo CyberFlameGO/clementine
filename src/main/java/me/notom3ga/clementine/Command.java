@@ -28,7 +28,7 @@ public abstract class Command extends org.bukkit.command.Command {
      * @param clementine The {@link Clementine} instance of the plugin.
      * @param name The main name of the command.
      */
-    protected Command(Clementine clementine, String name, String... aliases) {
+    protected Command(@NotNull Clementine clementine, @NotNull String name, String... aliases) {
         super(name);
 
         this.clementine = clementine;
